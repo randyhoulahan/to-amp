@@ -1,5 +1,5 @@
 # to-amp
-
+[![codebeat][codebeat-src]][codebeat-href]
 [![David-DM][david-dm-src]][david-dm-href]
 [![Standard JS][standard-js-src]][standard-js-href]
 [![Circle CI][circle-ci-src]][circle-ci-href]
@@ -108,3 +108,5 @@ Copyright (c) Randy J. Houlahan
 [npm-version-href]: https://npmjs.com/package/to-amp
 [npm-downloads-src]: https://img.shields.io/npm/v/to-amp/latest.svg?style=flat-square
 [npm-downloads-href]: https://npmjs.com/package/to-amp
+[codebeat-src]: https://codebeat.co/badges/52e4e261-5b9d-4ab1-9871-701a4fcd161d
+[codebeat-href]: https://codebeat.co/projects/github-com-randyhoulahan-to-amp-master
