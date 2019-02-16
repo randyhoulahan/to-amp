@@ -1,0 +1,92 @@
+{
+  "name": "to-amp",
+  "version": "1.0.0-beta.1",
+  "description": "Google AMP (Accelerated Mobile Pages) utility module.",
+  "license": "MIT",
+  "contributors": [
+    {
+      "name": "Randy J. Houlahan <randy@houlahan.ca>"
+    }
+  ],
+  "main": "dist/to-amp.umd.min.js",
+  "repository": "https://github.com/randyhoulahan/to-amp",
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --target lib src/main.js",
+    "lint": "vue-cli-service lint",
+    "test": "vue-cli-service test:unit --runInBand",
+    "test:watch": "vue-cli-service test:unit --watch --runInBand"   
+  },
+  "dependencies": {
+    "cherio": "^1.0.0-rc.2",
+    "consola": "^2.4.0",
+    "es6-error": "^4.1.1",
+    "isobject": "^3.0.1",
+    "sanitize-html": "^1.20.0"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.4.0",
+    "@vue/cli-plugin-eslint": "^3.4.0",
+    "@vue/cli-plugin-unit-jest": "^3.4.0",
+    "@vue/cli-service": "^3.4.0",
+    "@vue/eslint-config-standard": "^4.0.0",
+    "amphtml-validator": "^1.0.23",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-eslint": "^10.0.1",
+    "babel-jest": "^23.6.0",
+    "eslint": "^5.8.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "vue-cli-plugin-build-watch": "^1.0.0",
+    "vue-template-compiler": "^2.5.21"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "@vue/standard"
+    ],
+    "rules": {
+      "arrow-parens": 0,
+      "generator-star-spacing": 0,
+      "curly": 0,
+      "eqeqeq": 0,
+      "no-multi-spaces": 0,
+      "no-multiple-empty-lines": 0,
+      "padded-blocks": 0,
+      "semi": 0,
+      "unicode-bom": 0,
+      "no-unexpected-multiline": 0
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ],
+  "jest": {
+    "verbose": true,
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testMatch": [
+      "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
+    ],
+    "testURL": "http://localhost/"
+  }
+}
