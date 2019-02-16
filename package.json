@@ -1,6 +1,6 @@
 {
   "name": "to-amp",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0",
   "description": "Google AMP (Accelerated Mobile Pages) utility module.",
   "license": "MIT",
   "contributors": [
@@ -15,7 +15,8 @@
     "build": "vue-cli-service build --target lib src/main.js",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit --runInBand",
-    "test:watch": "vue-cli-service test:unit --watch --runInBand"   
+    "test:watch": "vue-cli-service test:unit --watch --runInBand",
+    "release": "standard-version && git push --follow-tags && npm publish"
   },
   "dependencies": {
     "cherio": "^1.0.0-rc.2",
