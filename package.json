@@ -1,6 +1,6 @@
 {
   "name": "to-amp",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.1",
   "description": "Google AMP (Accelerated Mobile Pages) utility module.",
   "license": "MIT",
   "contributors": [
@@ -15,8 +15,9 @@
     "build": "vue-cli-service build --target lib src/main.js",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit --runInBand",
+    "codecov": "codecov",    
     "test:watch": "vue-cli-service test:unit --watch --runInBand",
-    "release": "standard-version && git push --follow-tags && npm publish"
+    "release:npm": "npm publish"
   },
   "dependencies": {
     "cherio": "^1.0.0-rc.2",
@@ -35,6 +36,7 @@
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^23.6.0",
+    "codecov": "^3.2.0",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
     "vue-cli-plugin-build-watch": "^1.0.0",
@@ -88,6 +90,10 @@
     "testMatch": [
       "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
     ],
-    "testURL": "http://localhost/"
+    "testURL": "http://localhost/",
+
+      "coverageDirectory": "./coverage/",
+      "collectCoverage": true
+  
   }
 }
