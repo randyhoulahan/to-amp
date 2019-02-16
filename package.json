@@ -14,7 +14,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build --target lib src/main.js",
     "lint": "vue-cli-service lint",
-    "test": "vue-cli-service test:unit --runInBand",
+    "test": "vue-cli-service test:unit",
     "codecov": "codecov",    
     "test:watch": "vue-cli-service test:unit --watch --runInBand",
     "release:npm": "npm publish"
