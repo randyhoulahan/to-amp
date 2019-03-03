@@ -2,6 +2,7 @@ import cheerio from 'cherio'
 import consola from 'consola'
 import isObject from 'isobject'
 import Errors from './errors'
+import { minify } from 'html-minifier'
 import sanitizeHtml from 'sanitize-html'
 
 const SCOPE = 'AMP'
@@ -17,9 +18,16 @@ const cheerioOptions = {
 consola.withScope('ToAMP')
 
 export default class ToAMP {
+
   static domToAMPHtml (html = false, addlAtts = false, scope = SCOPE) {
     if (html) convert(html, addlAtts, scope)
 
+    return ToAMP.html[scope].$('body').html()
+  }
+
+  static toHTML (scope = SCOPE) {
+    if (ToAMP.minify)
+      return mini(ToAMP.html[scope].$('body').html())
     return ToAMP.html[scope].$('body').html()
   }
 
@@ -35,10 +43,11 @@ export default class ToAMP {
 
   static loadHtml (html, setDefault = true, scope = SCOPE) {
     ToAMP.html[scope] = { '$': cheerio.load(html, cheerioOptions) }
+
     if (setDefault) { setParseingDefaults(scope) }
   }
 
-  static loadImages (setDefault = true, scope = SCOPE) {
+  static  loadImages (setDefault = true, scope = SCOPE) {
     ToAMP.html[scope].images = { elements: ToAMP.html[scope].$('img') }
     linkAttribs(scope)
     if (setDefault) { setImageDefaults(scope) }
@@ -57,6 +66,8 @@ export default class ToAMP {
     }
   }
 
+
+
   static imgToAmpImg ({ el, attribs }, addlAttribs) {
     let ampAttribs = Object.assign(attribs, addlAttribs || {})
 
@@ -70,17 +81,26 @@ export default class ToAMP {
   }
 
   static htmlDocToAmpHtmlDoc (html, components = ToAMP.components, processBody = false) {
-    // only load amp components on this page
+
     let componentsOnPage = components.filter(name => ~html.indexOf(name))
+
+    if (~html.indexOf('amp-fx'))
+      componentsOnPage.push('amp-fx-collection')
+
     html = addAmpStyles(html)
-    if (processBody)
-      html = ToAMP.bodyToAMPHtml(html, false, 'FULL_PAGE')
 
     html = addAmpScripts(html, componentsOnPage)
     html = html.replace('<html', '<html ⚡')
-
-    html = ToAMP.cleanBody(html, componentsOnPage)
     html = ToAMP.clean(html)
+
+    if (processBody) {
+      html = ToAMP.bodyToAMPHtml(html, false, 'FULL_PAGE')
+      html = ToAMP.cleanBody(html, componentsOnPage, 'FULL_PAGE')
+    }
+
+    if (ToAMP.minify)
+      return mini(html)
+
     return html
   }
 
@@ -90,6 +110,7 @@ export default class ToAMP {
     ToAMP.components = options.components || []
     ToAMP.imgLayout = options.imgLayout || 'responsive'
     ToAMP.svgLayout = options.svgLayout || 'intrinsic'
+    ToAMP.minify = (options.minify === true) || false
     ToAMP.html = {}
   }
 
@@ -99,10 +120,11 @@ export default class ToAMP {
       html = '<!doctype html>' + html
     if (~html.indexOf('<meta charset="UTF-8">') > -1)
       html = html.replace('<head>', '<head>\n<meta charset="UTF-8">')
+
     return html
   }
 
-  static cleanBody (html, componentsOnPage = []) {
+  static cleanBody (html, componentsOnPage = [], scope = SCOPE) {
     let body = extractBody(html)
 
     if (!body) throw new Errors.NoBody()
@@ -110,6 +132,15 @@ export default class ToAMP {
     body =  sanitizeHtml(body, bodySanitizeConfig(componentsOnPage))
 
     return replaceBody(html, body)
+  }
+
+  static  domClean (scope = SCOPE) {
+
+    const ampTags = ToAMP.components.concat('amp-img')
+    ampTags.forEach(tag => {
+      let tagElements = ToAMP.html[scope].$(tag)
+      removeVDatas(tagElements)
+    })
   }
 
   static cleanHead (html, componentsOnPage = []) {
@@ -129,27 +160,47 @@ export default class ToAMP {
 
 ToAMP.setDefaultOpts()
 
-function isAddlAttsArrValid (addlAttribsArr) {
+function mini (html) {
+  return minify(html, {
+    // removeAttributeQuotes: true,
+    caseSensitive: true,
+    collapseWhitespace: true,
+    conservativeCollapse: true,
+    keepClosingSlash: true,
+    minifyCSS: false,
+    removeComments: true,
+    // removeEmptyElements: true,
+    removeRedundantAttributes: true,
+    sortAttributes: true,
+    sortClassName: true,
+    useShortDoctype: true
+  })
+}
+
+function removeVDatas (tags) {
+
+  if (!tags.length) return
+  let dataV = new RegExp(/(data-v-)\w+/g)
+
+  for (let i = 0; i < tags.length; i++)
+    for (const key in tags[i].attribs)
+      if (dataV.test(key))
+        delete (tags[i].attribs[key])
+}
+
+function isAddlAttsArrValid (addlAttribsArr = []) {
   if (!addlAttribsArr) return
 
-  if (addlAttribsArr.length != ToAMP.imgAttribs.length) { attrbArrLenError(addlAttribsArr.length, ToAMP.imgAttribs.length) }
+  if (addlAttribsArr.length != ToAMP.imgAttribs.length)
+    throw new Errors.AmpImgAttrs(addlAttribsArr.length, ToAMP.imgAttribs.length)
+
 
   for (let i = 0; i < addlAttribsArr.length; i++) {
-    if (!isObject(addlAttribsArr[i])) { notObjError() }
+    if (!isObject(addlAttribsArr[i]))
+      Errors.NotObjError()
   }
 }
 
-function attrbArrLenError (arr1, arr2) {
-  consola.error('Error: Additional amp-img attributes array not the legth of the loaded images array')
-  consola.error(`addlAttribsArr:${arr1.length} != ${arr2.length}`)
-  throw new Error('Error: Additional amp-img attributes array not the legth of the loaded images array')
-}
-
-function notObjError () {
-  let msg = 'Error: Additional amp-img attributes contains a non object'
-  consola.error(msg)
-  throw new Error(msg)
-}
 
 function isAmpAttrsValid (attribs) {
   let isValid = 0
@@ -165,17 +216,15 @@ function setParseingDefaults (scope = SCOPE) {
 
 function setImageDefaults (scope = SCOPE) {
   ToAMP.images = ToAMP.html[scope].images
-  ToAMP.imageElms = ToAMP.html[scope].images.elements
-  ToAMP.imgAttribs = ToAMP.html[scope].images.attribs
-  ToAMP.imgSrcs = ToAMP.html[scope].images.srcs
+  ToAMP.imageElms = ToAMP.html[scope].images.elements || []
+  ToAMP.imgAttribs = ToAMP.html[scope].images.attribs || []
+  ToAMP.imgSrcs = ToAMP.html[scope].images.srcs || []
 }
 
 function linkAttribs (scope = SCOPE) {
   let imgElements = ToAMP.html[scope].images.elements
   let imgAttribs = []
   let imgSrcs = []
-
-  if (!imgElements.length) return
 
   for (let i = 0; i < imgElements.length; i++) {
     let imgElm = imgElements[i]
@@ -190,14 +239,16 @@ function linkAttribs (scope = SCOPE) {
 function buildAttrString (attribs) {
   addImgLayout(attribs)
 
-  let attrStr
-  for (let name in attribs) { attrStr += `${name}="${attribs[name]}" ` }
+  let attrStr = ''
+  for (let name in attribs)
+    attrStr += `${name}="${attribs[name]}" `
 
   return attrStr
 }
 
 function getImgLayout (imageFormat) {
-  if (imageFormat === 'svg') { return ToAMP.svgLayout }
+  if (imageFormat === 'svg')
+    return ToAMP.svgLayout
   return ToAMP.imgLayout
 }
 
@@ -225,21 +276,9 @@ function addComponentScripts (scriptString, components = ToAMP.components) {
   return scriptString
 }
 
-// function addAmpStyles (html) {
-//   // thanks https://github.com/Futida
-//   // html = html.replace(/<style data-vue-ssr-id\W[^>]*/g, '<style amp-custom')
-
-//   html = html.replace(/<\s*style[^>]*/g, '<style amp-custom')
-
-//   html = html.replace(/<\/style>\s<style amp-custom>/gi, '')
-//   html = html.replace('</head>', ampBoilerplate + '\n</head>')
-
-//   return html
-// }
-
 function addAmpStyles (html)  {
 
-  html = html.replace(/<style/g, '<style amp-custom ')
+  html = html.replace(/<style/gi, '<style amp-custom ')
   let styles = html.match(/<style amp-custom\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi)
   html = html.replace(/<style amp-custom\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
 
@@ -251,7 +290,9 @@ function addAmpStyles (html)  {
       oneStyle += styles[i] + '\n'
     }
   }
+
   html = html.replace('</head>', `\n<style amp-custom >${oneStyle}</style>\n` + '\n</head>')
+  html = html.replace(/!important/gi, '')
   return html.replace('</head>', ampBoilerplate + '\n</head>')
 }
 
@@ -259,6 +300,7 @@ function convert (html = false, addlAtts = false, scope = SCOPE) {
   ToAMP.loadHtml(html, true, scope)
   ToAMP.loadImages(true, scope)
   ToAMP.convertImages(addlAtts, scope)
+  ToAMP.domClean(scope)
 }
 
 function extractBody (html) {
@@ -273,15 +315,26 @@ function replaceBody (html, newBody) {
 }
 
 function bodySanitizeConfig (componentsOnPage = []) {
-  return {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'amp-img', 'h2', 'h1' ].concat(componentsOnPage)),
 
+  return {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+      'amp-menu-container', 'header', 'nuxt-link', 'amp-accordion', 'amp-img', 'amp-sidebar', 'h2', 'h1', 'section',
+      'span',
+      'header',
+      'nav',
+      'footer',
+      'center',
+      'b',
+      'main',
+      'figure',
+      'amp-fx'
+    ].concat(componentsOnPage)),
     allowedAttributes: {
-      '*': ['class'],
+      '*': ['style', 'class', 'layout', 'alt', 'width', 'height',  'aria*', 'data-*', 'role', 'on', 'hidden', 'id', 'side', 'tabindex', 'media', 'type', 'controls', 'loop'],
       a: [ 'href', 'name', 'target', 'alt' ],
-      'amp-img': [ 'src', 'alt', 'width', 'height' ]
+      'amp-img': [ 'src', 'alt', 'width', 'height', 'layout' ]
     },
-    // Lots of these won't come up by default because we don't allow them
+    // allowedAttributes: false,
     selfClosing: [ 'amp-img', 'br', 'hr', 'area' ],
     // URL schemes we permit
     allowedSchemes: [ 'http', 'https', 'ftp', 'mailto' ],
@@ -301,7 +354,7 @@ function removeScripts (html) {
       saved += scripts[i].replace('async', '')
 
   html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-
+  // return html
   return html.replace('</head>', `${saved}\n</head>`)
 }
 

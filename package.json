@@ -1,6 +1,6 @@
 {
   "name": "to-amp",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Google AMP (Accelerated Mobile Pages) utility module.",
   "license": "MIT",
   "contributors": [
@@ -15,7 +15,7 @@
     "build": "vue-cli-service build --target lib src/main.js",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit",
-    "codecov": "codecov",    
+    "codecov": "codecov",
     "test:watch": "vue-cli-service test:unit --watch --runInBand",
     "release:npm": "npm publish"
   },
@@ -23,6 +23,7 @@
     "cherio": "^1.0.0-rc.2",
     "consola": "^2.4.0",
     "es6-error": "^4.1.1",
+    "html-minifier": "^3.5.21",
     "isobject": "^3.0.1",
     "sanitize-html": "^1.20.0"
   },
@@ -39,6 +40,7 @@
     "codecov": "^3.2.0",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
+    "npm-version": "^1.1.0",
     "vue-cli-plugin-build-watch": "^1.0.0",
     "vue-template-compiler": "^2.5.21"
   },
@@ -79,6 +81,7 @@
   ],
   "jest": {
     "verbose": true,
+    "testEnvironment": "node",
     "moduleFileExtensions": [
       "js",
       "jsx",
@@ -91,9 +94,7 @@
       "**/tests/unit/**/*.spec.(js|jsx|ts|tsx)|**/__tests__/*.(js|jsx|ts|tsx)"
     ],
     "testURL": "http://localhost/",
-
-      "coverageDirectory": "./coverage/",
-      "collectCoverage": true
-  
+    "coverageDirectory": "./coverage/",
+    "collectCoverage": true
   }
 }

@@ -15,4 +15,18 @@ export const HtmlNotString = class extends ExtendableError {
   }
 }
 
+export const AmpImgAttrs = class extends ExtendableError {
+  constructor (l1, l2, message = '') {
+    message = `Error: Additional amp-img attributes array not the legth of the loaded images array /n addlAttribsArr:${l1} != ${l2}`
+    super(message)
+    consola.error(message, this)
+  }
+}
+
+export const NotObjError = class extends ExtendableError {
+  constructor (message = 'Error: Additional amp-img attributes contains a non object') {
+    super(message)
+    consola.error(message, this)
+  }
+}
 export default { NoBody, HtmlNotString }

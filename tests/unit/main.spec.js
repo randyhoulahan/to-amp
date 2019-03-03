@@ -9,6 +9,7 @@ const options = {
   components: ['amp-carousel', 'amp-sidebar', 'amp-accordion', 'amp-instagram', 'amp-social-share', 'amp-fx-collection'],
   pathFilter: false,
   hostFilter: false,
+  // minify: true,
   calcImgDimensions: false
 }
 
@@ -20,7 +21,9 @@ beforeAll(() => {
   htmlSource = fs.readFileSync(path.resolve(__dirname, 'test.html'), 'utf8')
   amphtmlValidator.getInstance().then((v) => { v = validator })
 })
-beforeEach(() => { ampHtml = ToAMP.htmlDocToAmpHtmlDoc(htmlSource, options.components, true) })
+beforeEach(() => {
+  ampHtml = ToAMP.htmlDocToAmpHtmlDoc(htmlSource, options.components, true)
+})
 
 describe('Set Options', () => {
   it('ToAMP.setDefaultOpts(options):', () => {
@@ -30,9 +33,10 @@ describe('Set Options', () => {
 
 describe('Sets static properties with image data', () => {
   test('ToAMP.loadImages', () => {
-    expect(ToAMP.images.srcs.length).toBe(12)
-    expect(ToAMP.images.elements.length).toBe(12)
-    expect(ToAMP.images.attribs.length).toBe(12)
+
+    expect(ToAMP.imgSrcs.length).toBe(12)
+    expect(ToAMP.imageElms.length).toBe(12)
+    expect(ToAMP.imgAttribs.length).toBe(12)
   })
 })
 
@@ -73,9 +77,6 @@ describe('Throws Errors', () => {
 
 describe('AMP Validator', () => {
   it('is valid', () => {
-    // console.log('###################', ampHtml)
-    // let result = validator.validateString(ampHtml)
-
     amphtmlValidator.getInstance().then((v) => {
       let result = v.validateString(ampHtml)
 
@@ -100,6 +101,7 @@ describe('AMP Validator', () => {
     })
   })
 })
+
 
 describe('Preserve JSONLD', () => {
   it('is preserves', () => {
