@@ -2,7 +2,6 @@ import cheerio from 'cherio'
 import consola from 'consola'
 import isObject from 'isobject'
 import Errors from './errors'
-import { minify } from 'html-minifier'
 import sanitizeHtml from 'sanitize-html'
 
 const SCOPE = 'AMP'
@@ -26,8 +25,6 @@ export default class ToAMP {
   }
 
   static toHTML (scope = SCOPE) {
-    if (ToAMP.minify)
-      return mini(ToAMP.html[scope].$('body').html())
     return ToAMP.html[scope].$('body').html()
   }
 
@@ -98,9 +95,6 @@ export default class ToAMP {
       html = ToAMP.cleanBody(html, componentsOnPage, 'FULL_PAGE')
     }
 
-    if (ToAMP.minify)
-      return mini(html)
-
     return html
   }
 
@@ -110,7 +104,6 @@ export default class ToAMP {
     ToAMP.components = options.components || []
     ToAMP.imgLayout = options.imgLayout || 'responsive'
     ToAMP.svgLayout = options.svgLayout || 'intrinsic'
-    ToAMP.minify = (options.minify === true) || false
     ToAMP.html = {}
   }
 
@@ -160,22 +153,6 @@ export default class ToAMP {
 
 ToAMP.setDefaultOpts()
 
-function mini (html) {
-  return minify(html, {
-    // removeAttributeQuotes: true,
-    caseSensitive: true,
-    collapseWhitespace: true,
-    conservativeCollapse: true,
-    keepClosingSlash: true,
-    minifyCSS: false,
-    removeComments: true,
-    // removeEmptyElements: true,
-    removeRedundantAttributes: true,
-    sortAttributes: true,
-    sortClassName: true,
-    useShortDoctype: true
-  })
-}
 
 function removeVDatas (tags) {
 
