@@ -1,6 +1,6 @@
 {
   "name": "to-amp",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.5",
   "description": "Google AMP (Accelerated Mobile Pages) utility module.",
   "license": "MIT",
   "contributors": [
@@ -12,18 +12,21 @@
   "repository": "https://github.com/randyhoulahan/to-amp",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib src/main.js",
+    "build": "vue-cli-service build --target lib --formats umd-min src/main.js",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit",
     "codecov": "codecov",
     "test:watch": "vue-cli-service test:unit --watch --runInBand",
-    "release:npm": "npm publish"
+    "publish": "npm publish"
   },
+  "files": [
+    "/src",
+    "dist"
+  ],
   "dependencies": {
     "cherio": "^1.0.0-rc.2",
     "consola": "^2.4.0",
     "es6-error": "^4.1.1",
-    "html-minifier": "^3.5.21",
     "isobject": "^3.0.1",
     "sanitize-html": "^1.20.0"
   },

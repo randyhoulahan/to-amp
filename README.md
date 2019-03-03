@@ -6,6 +6,7 @@
 [![Codecov][codecov-src]][codecov-href]
 [![npm version][npm-version-src]][npm-version-href]
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![size][bundlephobia-src]][bundlephobia-href]
 
 > Google AMP (Accelerated Mobile Pages) utility module.  Cherio engine utility to convert html to google compliant html.
 
@@ -110,3 +111,5 @@ Copyright (c) Randy J. Houlahan
 [npm-downloads-href]: https://npmjs.com/package/to-amp
 [codebeat-src]: https://codebeat.co/badges/52e4e261-5b9d-4ab1-9871-701a4fcd161d
 [codebeat-href]: https://codebeat.co/projects/github-com-randyhoulahan-to-amp-master
+[bundlephobia-src]: https://badgen.net/bundlephobia/minzip/to-amp
+[bundlephobia-href]: https://bundlephobia.com/result?p=to-amp@1.0.0-beta.5
