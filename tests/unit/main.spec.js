@@ -80,11 +80,11 @@ describe('AMP Validator', () => {
     amphtmlValidator.getInstance().then((v) => {
       let result = v.validateString(ampHtml)
 
-      for (let index = result.errors.length - 1; index >= 0; index--) {
-        let error = result.errors[index]
-        var msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message
-        console.log('Warn', msg)
-      }
+      // for (let index = result.errors.length - 1; index >= 0; index--) {
+      //   let error = result.errors[index]
+      //   var msg = 'line ' + error.line + ', col ' + error.col + ': ' + error.message
+      //   console.log('Warn', msg)
+      // }
       expect((result.status === 'PASS')).toBeTruthy()
     })
 

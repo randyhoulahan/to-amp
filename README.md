@@ -90,6 +90,10 @@
 - Install dependencies using `yarn install` or `npm install`
 - Do a PR
 
+## TODO
+
+- pass html-sanitize options
+
 ## License
 
 [MIT License](./LICENSE)

@@ -44,7 +44,7 @@ export default class ToAMP {
     if (setDefault) { setParseingDefaults(scope) }
   }
 
-  static  loadImages (setDefault = true, scope = SCOPE) {
+  static loadImages (setDefault = true, scope = SCOPE) {
     ToAMP.html[scope].images = { elements: ToAMP.html[scope].$('img') }
     linkAttribs(scope)
     if (setDefault) { setImageDefaults(scope) }
@@ -99,12 +99,12 @@ export default class ToAMP {
   }
 
   static setDefaultOpts (options = {}) {
-    ToAMP.version = options.version || 'v0'
+    ToAMP.version          = options.version || 'v0'
     ToAMP.componentVersion = options.componentVersion || '0.1'
-    ToAMP.components = options.components || []
-    ToAMP.imgLayout = options.imgLayout || 'responsive'
-    ToAMP.svgLayout = options.svgLayout || 'intrinsic'
-    ToAMP.html = {}
+    ToAMP.components       = options.components || []
+    ToAMP.imgLayout        = options.imgLayout || 'responsive'
+    ToAMP.svgLayout        = options.svgLayout || 'intrinsic'
+    ToAMP.html             = {}
   }
 
   static clean (html) {
@@ -122,12 +122,12 @@ export default class ToAMP {
 
     if (!body) throw new Errors.NoBody()
 
-    body =  sanitizeHtml(body, bodySanitizeConfig(componentsOnPage))
+    body = sanitizeHtml(body, bodySanitizeConfig(componentsOnPage))
 
     return replaceBody(html, body)
   }
 
-  static  domClean (scope = SCOPE) {
+  static domClean (scope = SCOPE) {
 
     const ampTags = ToAMP.components.concat('amp-img')
     ampTags.forEach(tag => {
@@ -141,7 +141,7 @@ export default class ToAMP {
 
     if (!body) throw new Errors.NoBody()
 
-    body =  sanitizeHtml(body, bodySanitizeConfig(componentsOnPage))
+    body = sanitizeHtml(body, bodySanitizeConfig(componentsOnPage))
 
     return replaceBody(html, body)
   }
@@ -253,7 +253,7 @@ function addComponentScripts (scriptString, components = ToAMP.components) {
   return scriptString
 }
 
-function addAmpStyles (html)  {
+function addAmpStyles (html) {
 
   html = html.replace(/<style/gi, '<style amp-custom ')
   let styles = html.match(/<style amp-custom\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi)
@@ -304,18 +304,30 @@ function bodySanitizeConfig (componentsOnPage = []) {
       'b',
       'main',
       'figure',
-      'amp-fx'
+      'amp-fx',
+      'svg',
+      'defs',
+      'symbol',
+      'title',
+      'path',
+      'use',
+      'linearGradient',
+      'rect',
+      'polygon'
     ].concat(componentsOnPage)),
     allowedAttributes: {
-      '*': ['style', 'class', 'layout', 'alt', 'width', 'height',  'aria*', 'data-*', 'role', 'on', 'hidden', 'id', 'side', 'tabindex', 'media', 'type', 'controls', 'loop'],
+      '*': ['style', 'class', 'layout', 'alt', 'width', 'height', 'aria*', 'data-*', 'role', 'on', 'hidden', 'id', 'side', 'tabindex', 'media', 'type', 'controls', 'loop'],
       a: [ 'href', 'name', 'target', 'alt' ],
-      'amp-img': [ 'src', 'alt', 'width', 'height', 'layout' ]
+      'amp-img': [ 'src', 'alt', 'width', 'height', 'layout', 'srcset' ],
+      svg: ['*'],
+      symbol: ['*'],
+      use: ['*'],
+      path: ['*']
     },
     // allowedAttributes: false,
-    selfClosing: [ 'amp-img', 'br', 'hr', 'area' ],
+    selfClosing: [ 'amp-img', 'br', 'hr', 'area', 'use' ],
     // URL schemes we permit
-    allowedSchemes: [ 'http', 'https', 'ftp', 'mailto' ],
-    allowedSchemesByTag: {},
+    allowedSchemes: [ 'http', 'https', 'ftp', 'mailto', 'data' ],
     allowedSchemesAppliedToAttributes: [ 'href', 'src', 'cite' ],
     allowProtocolRelative: true,
     nonTextTags: []
