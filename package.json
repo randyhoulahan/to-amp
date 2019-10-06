@@ -47,32 +47,6 @@
     "vue-cli-plugin-build-watch": "^1.0.0",
     "vue-template-compiler": "^2.5.21"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "@vue/standard"
-    ],
-    "rules": {
-      "arrow-parens": 0,
-      "generator-star-spacing": 0,
-      "curly": 0,
-      "eqeqeq": 0,
-      "no-multi-spaces": 0,
-      "no-multiple-empty-lines": 0,
-      "padded-blocks": 0,
-      "semi": 0,
-      "unicode-bom": 0,
-      "no-unexpected-multiline": 0,
-      "no-console": 1
-    },
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
-  },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
@@ -100,5 +74,19 @@
     "testURL": "http://localhost/",
     "coverageDirectory": "./coverage/",
     "collectCoverage": true
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "@vue/standard"
+    ],
+    "rules": {},
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
   }
 }
