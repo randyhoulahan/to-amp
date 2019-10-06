@@ -29,4 +29,4 @@ export const NotObjError = class extends ExtendableError {
     consola.error(message, this)
   }
 }
-export default { NoBody, HtmlNotString }
+export default { NoBody, HtmlNotString, AmpImgAttrs, NotObjError }
