@@ -7,18 +7,16 @@ const ampBoilerplate = '<style amp-boilerplate>body{-webkit-animation:-amp-start
 export default class Head{
   static toAMP (html, components, scope = SCOPE){
     Head.oneStyle = ''
-    console.time('HEAD.toAMP');
 
     Head.componentsOnPage = components.filter(name => ~html.indexOf(name))
 
     if (~html.indexOf('amp-fx'))
       Head.componentsOnPage.push('amp-fx-collection')
 
-    html = cleanHead(html, scope = SCOPE)
+    html = cleanHead(html, scope)
     html = addAmpStyles(html)
     html = addAmpScripts(html, Head.componentsOnPage)
 
-    console.timeEnd('HEAD.toAMP');
     return html
   }
 }
@@ -26,7 +24,7 @@ export default class Head{
 Head.componentsOnPage = []
 Head.oneStyle = ''
 
-function cleanHead (html, scope = SCOPE){
+function cleanHead (html){
   html = html.replace('<head>', '<head>\n')
   let head = extractHead(html)
 

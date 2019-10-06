@@ -164,8 +164,6 @@ function removeVDatas (tags){
 }
 
 function isAddlAttsArrValid (addlAttribsArr = []){
-  console.log('Errors================', Errors)
-  process.exit(1)
   if (!addlAttribsArr) return
 
   if (addlAttribsArr.length != ToAMP.imgAttribs.length)

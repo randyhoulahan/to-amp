@@ -1,8 +1,8 @@
 module.exports =  {
   root: true,
-  env: {
+  env : {
     browser: true,
-    node: true
+    node   : true
   },
   parserOptions: {
     parser: 'babel-eslint'
@@ -14,13 +14,13 @@ module.exports =  {
   // required to lint *.vue files
   plugins: [ 'vue' ],
   // add your custom rules here
-  rules: {
+  rules  : {
     curly                 : [ 'error', 'multi', 'consistent' ],
     complexity            : [ 'error', 10 ],
     'max-statements'      : [ 'error', 15 ],
     'max-params'          : [ 'error', 3 ],
     'max-nested-callbacks': [ 'error', 3 ],
-    'max-depth': [
+    'max-depth'           : [
       'error',
       4
     ],
@@ -93,7 +93,7 @@ module.exports =  {
     indent: [
       'error',
       2,
-      { 'MemberExpression': 1, 'ObjectExpression': 'first' }
+      { MemberExpression: 1, ObjectExpression: 'first' }
     ],
     'key-spacing': [
       'error',
