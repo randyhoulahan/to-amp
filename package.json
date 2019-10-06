@@ -12,7 +12,7 @@
   "repository": "https://github.com/randyhoulahan/to-amp",
   "scripts": {
     "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build --target lib --formats umd-min src/main.js",
+    "build": "vue-cli-service build --modern --target lib --formats umd-min src/main.js",
     "lint": "vue-cli-service lint",
     "test": "vue-cli-service test:unit",
     "codecov": "codecov",

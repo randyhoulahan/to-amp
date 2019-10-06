@@ -7,6 +7,7 @@ module.exports = {
   },
 
   configureWebpack: {
+    // watch: true,
     externals: {
       cherio: 'cherio',
       consola: 'consola',
