@@ -8,11 +8,11 @@
 [![npm downloads][npm-downloads-src]][npm-downloads-href]
 [![size][bundlephobia-src]][bundlephobia-href]
 
-> Google AMP (Accelerated Mobile Pages) utility module.  Cherio engine utility to convert html to google compliant html.
+> Google AMP (Accelerated Mobile Pages) utility module. ALPHA-not stable 
 
 ## Setup
 
-- Add `to-amp` dependency using yarn or npm to your project
+<!-- - Add `to-amp` dependency using yarn or npm to your project
 
 ```js
   yarn add to-amp
@@ -82,7 +82,7 @@
   static imgToAmpImg ({ el, attribs }, addlAttribs)
 
   static htmlPageToAmpHtmlPage (html, components = AMP.components)
-```
+``` -->
 
 ## Development
 
@@ -92,6 +92,8 @@
 
 ## TODO
 
+- refactor to smaller parts
+- remove cherio in favor of html-sanitize
 - pass html-sanitize options
 
 ## License
