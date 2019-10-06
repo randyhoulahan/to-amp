@@ -1,34 +1,31 @@
-import cheerio from 'cherio'
-import consola from 'consola'
-import isObject from 'isobject'
-import Errors from './errors'
+import cheerio      from 'cherio'
+import consola      from 'consola'
+import isObject     from 'isobject'
+import Errors       from './errors'
+import Head         from './head'
 import sanitizeHtml from 'sanitize-html'
 
-const SCOPE = 'AMP'
-const reqImgAttribs = ['src', 'width', 'height', 'layout']
-const ampBoilerplate = `<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>`
-const cheerioOptions = {
-  cwd: '',
-  round: true,
-  normalizeWhitespace: true,
-  xmlMode: false
-}
+const SCOPE          = 'AMP'
+const reqImgAttribs  = [ 'src', 'width', 'height', 'layout' ]
+const cheerioOptions = {  cwd                : '',
+                          round              : true,
+                          normalizeWhitespace: true,
+                          xmlMode            : false }
 
 consola.withScope('ToAMP')
 
-export default class ToAMP {
-
-  static domToAMPHtml (html = false, addlAtts = false, scope = SCOPE) {
+export default class ToAMP{
+  static domToAMPHtml (html = false, addlAtts = false, scope = SCOPE){
     if (html) convert(html, addlAtts, scope)
 
     return ToAMP.html[scope].$('body').html()
   }
 
-  static toHTML (scope = SCOPE) {
+  static toHTML (scope = SCOPE){
     return ToAMP.html[scope].$('body').html()
   }
 
-  static bodyToAMPHtml (html = false, addlAtts = false, scope = SCOPE) {
+  static bodyToAMPHtml (html = false, addlAtts = false, scope = SCOPE){
     let body = extractBody(html)
 
     if (!body) throw new Errors.NoBody()
@@ -38,86 +35,87 @@ export default class ToAMP {
     return replaceBody(html, body)
   }
 
-  static loadHtml (html, setDefault = true, scope = SCOPE) {
-    ToAMP.html[scope] = { '$': cheerio.load(html, cheerioOptions) }
+  static loadHtml (html, setDefault = true, scope = SCOPE){
+    ToAMP.html[scope] = { $: cheerio.load(html, cheerioOptions) }
 
-    if (setDefault) { setParseingDefaults(scope) }
+    if (setDefault) setParseingDefaults(scope)
   }
 
-  static loadImages (setDefault = true, scope = SCOPE) {
+  static loadImages (setDefault = true, scope = SCOPE){
     ToAMP.html[scope].images = { elements: ToAMP.html[scope].$('img') }
     linkAttribs(scope)
-    if (setDefault) { setImageDefaults(scope) }
+    if (setDefault) setImageDefaults(scope)
   }
 
-  static convertImages (addlAtts = false, scope = SCOPE) {
+  static convertImages (addlAtts = false, scope = SCOPE){
     isAddlAttsArrValid(addlAtts)
-    let imgElements = ToAMP.html[scope].images.elements
-    let imgAttribs = ToAMP.html[scope].images.attribs
+    const imgElements = ToAMP.html[scope].images.elements
+    const imgAttribs = ToAMP.html[scope].images.attribs
 
-    for (let i = 0; i < imgElements.length; i++) {
-      let el = imgElements[i]
-      let attribs = imgAttribs[i]
-      let addlAttribs = addlAtts[i]
-      ToAMP.imgToAmpImg({ el: el, attribs: attribs }, addlAttribs)
+    for (let i = 0; i < imgElements.length; i++){
+      const el = imgElements[i]
+      const attribs = imgAttribs[i]
+      const addlAttribs = addlAtts[i]
+
+      ToAMP.imgToAmpImg({ el, attribs }, addlAttribs)
     }
   }
 
+  static imgToAmpImg ({ el, attribs }, addlAttribs){
+    const ampAttribs = Object.assign(attribs, addlAttribs || {})
 
+    if (!isAmpAttrsValid(ampAttribs)) ToAMP.$(el).remove()
 
-  static imgToAmpImg ({ el, attribs }, addlAttribs) {
-    let ampAttribs = Object.assign(attribs, addlAttribs || {})
-
-    if (!isAmpAttrsValid(ampAttribs)) { ToAMP.$(el).remove() }
-
-    let attrStr = buildAttrString(ampAttribs)
+    const attrStr = buildAttrString(ampAttribs)
 
     ToAMP.$(`<amp-img ${attrStr}></amp-img>`).insertAfter(el)
 
     ToAMP.$(el).remove()
   }
 
-  static htmlDocToAmpHtmlDoc (html, components = ToAMP.components, processBody = false) {
-
-    let componentsOnPage = components.filter(name => ~html.indexOf(name))
+  static htmlDocToAmpHtmlDoc (html, components = ToAMP.components, processBody = false){
+    const componentsOnPage = components.filter(name => ~html.indexOf(name))
 
     if (~html.indexOf('amp-fx'))
       componentsOnPage.push('amp-fx-collection')
 
-    html = addAmpStyles(html)
+    // html = addAmpScripts(html, componentsOnPage)
+    // html = addAmpStyles(html)
 
-    html = addAmpScripts(html, componentsOnPage)
+
     html = html.replace('<html', '<html ⚡')
     html = ToAMP.clean(html)
 
-    if (processBody) {
+    if (processBody){
       html = ToAMP.bodyToAMPHtml(html, false, 'FULL_PAGE')
       html = ToAMP.cleanBody(html, componentsOnPage, 'FULL_PAGE')
     }
-
+    //
+    html =  Head.toAMP(html, components)
     return html
   }
 
-  static setDefaultOpts (options = {}) {
-    ToAMP.version          = options.version || 'v0'
-    ToAMP.componentVersion = options.componentVersion || '0.1'
-    ToAMP.components       = options.components || []
+  static setDefaultOpts (options = {}){
+    /*eslint-disable */
+    ToAMP.version          = ToAMP.Head.version          = options.version          || 'v0'
+    ToAMP.componentVersion = ToAMP.Head.componentVersion = options.componentVersion || '0.1'
+    ToAMP.components       = ToAMP.Head.components       = options.components       || []
+    /* eslint-enable */
     ToAMP.imgLayout        = options.imgLayout || 'responsive'
     ToAMP.svgLayout        = options.svgLayout || 'intrinsic'
     ToAMP.html             = {}
   }
 
-  static clean (html) {
-
+  static clean (html){
     if (~html.indexOf('<!doctype html>') > -1)
       html = '<!doctype html>' + html
-    if (~html.indexOf('<meta charset="UTF-8">') > -1)
-      html = html.replace('<head>', '<head>\n<meta charset="UTF-8">')
+    // if (!html.match(/<meta charset="UTF-8">/i))
+    //   html = html.replace('<head>', '<head>\n<meta charset="UTF-8"></meta>\n')
 
     return html
   }
 
-  static cleanBody (html, componentsOnPage = [], scope = SCOPE) {
+  static cleanBody (html, componentsOnPage = []){
     let body = extractBody(html)
 
     if (!body) throw new Errors.NoBody()
@@ -127,16 +125,17 @@ export default class ToAMP {
     return replaceBody(html, body)
   }
 
-  static domClean (scope = SCOPE) {
-
+  static domClean (scope = SCOPE){
     const ampTags = ToAMP.components.concat('amp-img')
+
     ampTags.forEach(tag => {
-      let tagElements = ToAMP.html[scope].$(tag)
+      const tagElements = ToAMP.html[scope].$(tag)
+
       removeVDatas(tagElements)
     })
   }
 
-  static cleanHead (html, componentsOnPage = []) {
+  static cleanHead (html, componentsOnPage = []){
     let body = extractBody(html)
 
     if (!body) throw new Errors.NoBody()
@@ -146,18 +145,17 @@ export default class ToAMP {
     return replaceBody(html, body)
   }
 
-  static destroy () {
+  static destroy (){
     ToAMP.html = {}
   }
 }
-
+ToAMP.Head = Head
 ToAMP.setDefaultOpts()
 
 
-function removeVDatas (tags) {
-
+function removeVDatas (tags){
   if (!tags.length) return
-  let dataV = new RegExp(/(data-v-)\w+/g)
+  const dataV = new RegExp(/(data-v-)\w+/g)
 
   for (let i = 0; i < tags.length; i++)
     for (const key in tags[i].attribs)
@@ -165,46 +163,48 @@ function removeVDatas (tags) {
         delete (tags[i].attribs[key])
 }
 
-function isAddlAttsArrValid (addlAttribsArr = []) {
+function isAddlAttsArrValid (addlAttribsArr = []){
+  console.log('Errors================', Errors)
+  process.exit(1)
   if (!addlAttribsArr) return
 
   if (addlAttribsArr.length != ToAMP.imgAttribs.length)
     throw new Errors.AmpImgAttrs(addlAttribsArr.length, ToAMP.imgAttribs.length)
 
 
-  for (let i = 0; i < addlAttribsArr.length; i++) {
+  for (let i = 0; i < addlAttribsArr.length; i++)
     if (!isObject(addlAttribsArr[i]))
       Errors.NotObjError()
-  }
 }
 
 
-function isAmpAttrsValid (attribs) {
+function isAmpAttrsValid (attribs){
   let isValid = 0
 
-  for (let name in attribs) { if (reqImgAttribs.includes(name)) isValid++ }
+  for (const name in attribs) if (reqImgAttribs.includes(name)) isValid++
 
   return isValid == 3
 }
 
-function setParseingDefaults (scope = SCOPE) {
+function setParseingDefaults (scope = SCOPE){
   ToAMP.$ = ToAMP.html[scope].$
 }
 
-function setImageDefaults (scope = SCOPE) {
+function setImageDefaults (scope = SCOPE){
   ToAMP.images = ToAMP.html[scope].images
   ToAMP.imageElms = ToAMP.html[scope].images.elements || []
   ToAMP.imgAttribs = ToAMP.html[scope].images.attribs || []
   ToAMP.imgSrcs = ToAMP.html[scope].images.srcs || []
 }
 
-function linkAttribs (scope = SCOPE) {
-  let imgElements = ToAMP.html[scope].images.elements
-  let imgAttribs = []
-  let imgSrcs = []
+function linkAttribs (scope = SCOPE){
+  const imgElements = ToAMP.html[scope].images.elements
+  const imgAttribs = []
+  const imgSrcs = []
 
-  for (let i = 0; i < imgElements.length; i++) {
-    let imgElm = imgElements[i]
+  for (let i = 0; i < imgElements.length; i++){
+    const imgElm = imgElements[i]
+
     imgAttribs[i] = imgElm.attribs
     imgSrcs[i] = imgAttribs[i].src
   }
@@ -213,86 +213,51 @@ function linkAttribs (scope = SCOPE) {
   ToAMP.html[scope].images.srcs = imgSrcs
 }
 
-function buildAttrString (attribs) {
+function buildAttrString (attribs){
   addImgLayout(attribs)
 
   let attrStr = ''
-  for (let name in attribs)
+
+  for (const name in attribs)
     attrStr += `${name}="${attribs[name]}" `
 
   return attrStr
 }
 
-function getImgLayout (imageFormat) {
+function getImgLayout (imageFormat){
   if (imageFormat === 'svg')
     return ToAMP.svgLayout
   return ToAMP.imgLayout
 }
 
-function addImgLayout (attribs) {
-  if (!attribs.layout) {
-    let format = ~attribs.src.indexOf('.svg') ? 'svg' : false
+function addImgLayout (attribs){
+  if (!attribs.layout){
+    const format = ~attribs.src.indexOf('.svg') ? 'svg' : false
+
     attribs.layout = getImgLayout(format)
   }
 }
 
-// remove existing js scripts and add amp scripts
-function addAmpScripts (html, components = ToAMP.components) {
-  html = removeScripts(html)
 
-  let scriptString = `<script async src="https://cdn.ampproject.org/${ToAMP.version}.js"></script> `
-
-  // Add AMP script before </head>
-  return html.replace('</head>', addComponentScripts(scriptString, components) + '\n</head>')
-}
-
-function addComponentScripts (scriptString, components = ToAMP.components) {
-  components.forEach(name => {
-    scriptString += `<script custom-element="${name}" src="https://cdn.ampproject.org/${ToAMP.version}/${name}-${ToAMP.componentVersion}.js" async=""></script> `
-  })
-  return scriptString
-}
-
-function addAmpStyles (html) {
-
-  html = html.replace(/<style/gi, '<style amp-custom ')
-  let styles = html.match(/<style amp-custom\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi)
-  html = html.replace(/<style amp-custom\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-
-  let oneStyle = ''
-  if (styles) {
-    for (let i = 0; i < styles.length; i++) {
-      styles[i] = styles[i].replace(/<style amp-custom .*>/gi, '')
-      styles[i] = styles[i].replace(/<\/style>/gi, '')
-      oneStyle += styles[i] + '\n'
-    }
-  }
-
-  html = html.replace('</head>', `\n<style amp-custom >${oneStyle}</style>\n` + '\n</head>')
-  html = html.replace(/!important/gi, '')
-  return html.replace('</head>', ampBoilerplate + '\n</head>')
-}
-
-function convert (html = false, addlAtts = false, scope = SCOPE) {
+function convert (html = false, addlAtts = false, scope = SCOPE){
   ToAMP.loadHtml(html, true, scope)
   ToAMP.loadImages(true, scope)
   ToAMP.convertImages(addlAtts, scope)
   ToAMP.domClean(scope)
 }
 
-function extractBody (html) {
+function extractBody (html){
   if (!html) throw new Errors.HtmlNotString()
   return (html.match(/<body[^>]*>[\s\S]*<\/body>/gi) || [])[0]
 }
 
-function replaceBody (html, newBody) {
+function replaceBody (html, newBody){
   html = html.replace(/<body[^>]*>[\s\S]*<\/body>/gi, '')
   html = html.replace('</head>', `\n</head>\n <body>\n${newBody}\n</body>\n`)
   return html
 }
 
-function bodySanitizeConfig (componentsOnPage = []) {
-
+function bodySanitizeConfig (componentsOnPage = []){
   return {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([
       'amp-menu-container', 'header', 'nuxt-link', 'amp-accordion', 'amp-img', 'amp-sidebar', 'h2', 'h1', 'section',
@@ -313,37 +278,53 @@ function bodySanitizeConfig (componentsOnPage = []) {
       'use',
       'linearGradient',
       'rect',
-      'polygon'
+      'polygon',
+      'amp-youtube'
     ].concat(componentsOnPage)),
     allowedAttributes: {
-      '*': ['style', 'class', 'layout', 'alt', 'width', 'height', 'aria*', 'data-*', 'role', 'on', 'hidden', 'id', 'side', 'tabindex', 'media', 'type', 'controls', 'loop'],
-      a: [ 'href', 'name', 'target', 'alt' ],
-      'amp-img': [ 'src', 'alt', 'width', 'height', 'layout', 'srcset' ],
-      svg: ['*'],
-      symbol: ['*'],
-      use: ['*'],
-      path: ['*']
+      '*'                        : [ 'style', 'class', 'layout', 'alt', 'width', 'height', 'aria*', 'data-*', 'role', 'on', 'hidden', 'id', 'side', 'tabindex', 'media', 'type', 'controls', 'loop' ],
+      a                          : [ 'href', 'name', 'target', 'rel', 'aria*' ],
+      img                        : [ 'src', 'alt', 'width', 'height', 'layout', 'srcset' ],
+      'amp-img'                  : [ 'src', 'alt', 'width', 'height', 'layout', 'srcset', 'amp-fx' ],
+      'amp-install-serviceworker': [ 'src', 'data-iframe-src', 'data-scope', 'layout', 'data-no-service-worker-fallback-url-match', 'data-no-service-worker-fallback-shell-url' ],
+      'amp-*'                    : [ '*' ],
+      svg                        : [ '*' ],
+      symbol                     : [ '*' ],
+      use                        : [ '*' ],
+      path                       : [ '*' ]
     },
     // allowedAttributes: false,
-    selfClosing: [ 'amp-img', 'br', 'hr', 'area', 'use' ],
+    selfClosing                      : [ 'img', 'amp-img', 'br', 'hr', 'area', 'use' ],
     // URL schemes we permit
-    allowedSchemes: [ 'http', 'https', 'ftp', 'mailto', 'data' ],
+    allowedSchemes                   : [ 'http', 'https', 'ftp', 'mailto', 'data' ],
     allowedSchemesAppliedToAttributes: [ 'href', 'src', 'cite' ],
-    allowProtocolRelative: true,
-    nonTextTags: []
+    allowProtocolRelative            : true,
+    // nonTextTags: [],
+    transformTags                    : {
+      iframe: iframeTransform
+    }
+
   }
 }
 
-/// Remove every script tag from generated HTML except jsonld
-function removeScripts (html) {
-  let scripts = html.match(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi)
-  let saved = ''
-  for (let i = 0; i < scripts.length; i++)
-    if (scripts[i].includes('application/ld+json'))
-      saved += scripts[i].replace('async', '')
 
-  html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-  // return html
-  return html.replace('</head>', `${saved}\n</head>`)
+function iframeTransform (tagName, attribs){
+  if (attribs.src.includes('https://www.youtube.com/embed/'))
+    return ampYoutube(attribs)
+  return {}
 }
 
+function ampYoutube (attribs){
+  if (!ToAMP.Head.componentsOnPage.includes('amp-youtube'))
+    ToAMP.Head.componentsOnPage.push('amp-youtube')
+
+  return {
+    tagName: 'amp-youtube',
+    attribs: {
+      width         : '480',
+      height        : '270',
+      layout        : 'responsive',
+      'data-videoid': attribs.src.replace('https://www.youtube.com/embed/', '')
+    }
+  }
+}
