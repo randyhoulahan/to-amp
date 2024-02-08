@@ -17,7 +17,7 @@
 ```js
   yarn add to-amp
 ```
-
+    
 ## Example
 
 ```js
